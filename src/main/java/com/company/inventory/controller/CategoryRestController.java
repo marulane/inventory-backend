@@ -2,6 +2,7 @@ package com.company.inventory.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,8 @@ import com.company.inventory.services.ICategoryService;
 
 //Clase controladora que expone el servicio como tipo Rest
 
+//La anotacion 	Cross Origin sirve para evitar conflictos de comunicacion entre el backend y el frontend
+@CrossOrigin(origins = {"http://localhost:4200"}) //4200 es el puerto por el cual escucha una aplicacion Angular por defecto
 @RestController
 @RequestMapping("/api/v1") //mapping general que tendran todos los servicios de este controlador
 public class CategoryRestController {
