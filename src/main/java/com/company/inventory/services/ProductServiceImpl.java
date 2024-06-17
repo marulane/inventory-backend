@@ -149,4 +149,67 @@ public class ProductServiceImpl implements IProductService {
 		return new ResponseEntity <ProductResponseRest>(response, HttpStatus.OK);
 	}
 
+
+	@Transactional
+	@Override
+	public ResponseEntity<ProductResponseRest> deleteById(Long productId) {
+		ProductResponseRest response = new ProductResponseRest();
+
+		
+		try {
+			//delete product by Id
+			productDao.deleteById(productId);		
+			response.setMetadata("Respuesta ok", "00", "Producto eliminado");
+
+		
+		}catch(Exception e) {
+			e.getStackTrace(); //para agregar mas informacion del error en el log
+			response.setMetadata("Respuesta nok", "-1", "Error al eliminar producto");
+			return new ResponseEntity <ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return new ResponseEntity <ProductResponseRest>(response, HttpStatus.OK);
+	}
+
+
+	@Transactional
+	@Override
+	public ResponseEntity<ProductResponseRest> search() {
+		ProductResponseRest response = new ProductResponseRest();
+		List<Product> list = new ArrayList<>();
+		List<Product> listAux = new ArrayList<>();
+
+		
+		try {
+			//search product by Name
+			listAux = (List <Product>) productDao.findAll();
+						
+			if( listAux.size() > 0) {
+				
+				listAux.stream().forEach((p)->{
+					byte[] imageDescompressed = Util.decompressZLib(p.getPicture());
+					p.setPicture(imageDescompressed);
+					list.add(p);
+				});
+
+				
+				response.getProduct().setProducts(list);
+				
+				response.setMetadata("Respuesta ok", "00", "Productos encontrados");
+			
+			}else {
+				response.setMetadata("Respuesta nok", "-1", "Productos no encontrados");
+				return new ResponseEntity <ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+			
+		
+		}catch(Exception e) {
+			e.getStackTrace(); //para agregar mas informacion del error en el log
+			response.setMetadata("Respuesta nok", "-1", "Error al buscar productos");
+			return new ResponseEntity <ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return new ResponseEntity <ProductResponseRest>(response, HttpStatus.OK);
+	}
+
 }
