@@ -212,4 +212,59 @@ public class ProductServiceImpl implements IProductService {
 		return new ResponseEntity <ProductResponseRest>(response, HttpStatus.OK);
 	}
 
+
+	@Override
+	@Transactional
+	public ResponseEntity<ProductResponseRest> update(Product product, Long categoryId, Long id) {
+		ProductResponseRest response = new ProductResponseRest();
+		List<Product> list = new ArrayList<>();
+		
+		try {
+			//search category to set in the product object
+			Optional<Category> category = categoryDao.findById(categoryId);
+			
+			if(category.isPresent()) {
+				product.setCategory(category.get());
+			}else {
+				response.setMetadata("Respuesta nok", "-1", "Categoría asociada al producto no encontrada");
+				return new ResponseEntity <ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+			
+			//search product to update
+			Optional <Product> productSearched = productDao.findById(id); //para buscar el producto con el id pasado por el producto
+			
+			if(productSearched.isPresent()) {
+								
+				//Se actualiza el producto
+				productSearched.get().setQuantity(product.getQuantity());
+				productSearched.get().setCategory(product.getCategory());
+				productSearched.get().setName(product.getName());
+				productSearched.get().setPicture(product.getPicture());
+				productSearched.get().setPrice(product.getPrice());
+
+				Product productToUpdate = productDao.save(productSearched.get()); //Se guarda el producto en DB
+				
+				if(productToUpdate != null) {
+					list.add(productToUpdate);
+					response.getProduct().setProducts(list);
+					response.setMetadata("Respuesta ok", "00", "Producto actualizado");
+				} else {
+					response.setMetadata("Respuesta nok", "-1", "producto no actualizado");
+					return new ResponseEntity <ProductResponseRest>(response, HttpStatus.BAD_REQUEST);
+				}
+				
+		
+			}else {
+				response.setMetadata("Respuesta nok", "-1", "producto no actualizado");
+				return new ResponseEntity <ProductResponseRest>(response, HttpStatus.BAD_REQUEST);
+			}
+		}catch(Exception e) {
+			e.getStackTrace(); //para agregar mas informacion del error en el log
+			response.setMetadata("Respuesta nok", "-1", "Error al guardar producto");
+			return new ResponseEntity <ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity <ProductResponseRest>(response, HttpStatus.OK);
+	}
+
 }
